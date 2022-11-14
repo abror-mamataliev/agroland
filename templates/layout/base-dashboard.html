@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/plugins/fontawesome/all.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout/base-dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout/aside-dashboard.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
+    {% block style %}{% endblock %}
+    <title>{% block title %}{% endblock %} - AgroLand</title>
+</head>
+
+<body>
+    <div id="wrapper">
+        <aside class="flex-shrink-0">
+            {% include 'layout/aside-dashboard.html' %}
+        </aside>
+        <main class="d-flex flex-column w-100">
+            <div class="container-fluid">
+                {% include 'layout/header-dashboard.html' %}
+                <div class="row m-3 mb-0">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endwith %}
+                </div>
+            </div>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='dist/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='dist/js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='dist/plugins/fontawesome/all.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/layout/base-dashboard.js') }}"></script>
+    <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.2/leaflet.draw-src.js"></script>
+    <script src="https://unpkg.com/esri-leaflet@^3.0.8/dist/esri-leaflet.js"></script>
+    <script src="https://unpkg.com/esri-leaflet-vector@3.1.3/dist/esri-leaflet-vector.js"></script>
+    <!-- <script src="https://unpkg.com/esri-leaflet-vector@4.0.0/dist/esri-leaflet-vector.js"></script> -->
+    {% block script %}{% endblock %}
+</body>
+
+</html>

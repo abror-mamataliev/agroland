@@ -1,0 +1,11 @@
+<nav class="navbar navbar-light bg-light static-top">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('core.index') }}">
+            <img src="{{ url_for('static', filename='img/logo.jpg') }}" height="75">
+        </a>
+        <div>
+            <a class="btn text-white" style="background-color: #3fd951;" href="{{ url_for('auth.login') }}">Kirish</a>
+            <a class="btn text-white" style="background-color: #3fd951;" href="{{ url_for('auth.register') }}">Ro'yhatdan o'tish</a>
+        </div>
+    </div>
+</nav>

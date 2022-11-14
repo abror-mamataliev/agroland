@@ -1,0 +1,505 @@
+{% extends 'layout/base-dashboard.html' %}
+
+{% block title %}Shaxsiy kabinet{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard/style.css') }}">
+{% endblock %}
+
+{% block content %}
+<button type="button" class="btn btn-floating btn-lg text-white" id="btn-add-polygon"
+    style="background-color: #3fd951;">
+    <i class="fas fa-plus"></i>
+</button>
+<div class="modal fade" id="polygonCreateModal" tabindex="-1" aria-labelledby="polygonCreateModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form>
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="polygonCreateModalLabel">Ma'lumotlarni kiriting</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="farmer">Fermer nomi</label>
+                    <input type="text" name="farmer" id="farmer" class="form-control mt-2">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+                    <button type="submit" class="btn btn-primary">Saqlash</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="container-fluid mb-2">
+    <div class="row">
+        <div class="col-lg-9 col-md-7 col-12">
+            <div id="map"></div>
+        </div>
+        <div class="col-lg-3 col-md-5 col-12" style="height: 400px; overflow-x: hidden; overflow-y: scroll;">
+            <table id="polygon-data" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>T/R</th>
+                        <th>Fermer nomi</th>
+                        <th>Maydoni</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-9">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="btn-group w-100" role="group" aria-label="Tiles group">
+                        <select id="index" class="form-select w-auto">
+                            <option value="-1">Google Sattelite</option>
+                            <option value="0">NDVI</option>
+                            <option value="1">NDMI</option>
+                            <option value="2">GNDVI</option>
+                        </select>
+                    </div>
+                    <div class="legend d-none">
+                        <p>&nbsp;</p>
+                        <p style="text-align:center">
+                            <strong>
+                                <span style="color:#e60000">NDVI o'simlikning rivojlanishi</span>
+                            </strong>
+                        </p>
+                        <table cellpadding="0" cellspacing="0" style="width:95%">
+                            <tbody>
+                                <tr>
+                                    <td align="center" width="35"><img border="0"
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAMUlEQVQ4jWNhoDJgoZmBzxgY/lNikBQDAyOKgdQCowaOGjhq4KiBdDYQVp5RzUBqAQBpMAJs0IW6GwAAAABJRU5ErkJggg=="
+                                            style="opacity:1" /></td>
+                                    <td>
+                                        <table style="width:95%">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="left">Suv yoki boshqa yerlar</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" width="35"><img border="0"
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAMUlEQVQ4jWNhoDJgoZmB/3cx/KfEIEY3BkYUA6kFRg0cNXDUwFED6WwgrDyjmoHUAgAg6QOZ41VwVgAAAABJRU5ErkJggg=="
+                                            style="opacity:1" /></td>
+                                    <td>
+                                        <table style="width:95%">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="left">Ochiq yer maydoni</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" width="35"><img border="0"
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAMUlEQVQ4jWNhoDJgoZmB//8z/KfEIEZGBkYUA6kFRg0cNXDUwFED6WwgrDyjmoHUAgAJMQNUcB1RQwAAAABJRU5ErkJggg=="
+                                            style="opacity:1" /></td>
+                                    <td>
+                                        <table style="width:95%">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="left">Kuchsiz rivojlangan</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" width="35"><img border="0"
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAMUlEQVQ4jWNhoDJgoZmBq/4z/KfEoDBGBkYUA6kFRg0cNXDUwFED6WwgrDyjmoHUAgAmvgOpU7TnCwAAAABJRU5ErkJggg=="
+                                            style="opacity:1" /></td>
+                                    <td>
+                                        <table style="width:95%">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="left">O'rtacha rivojlangan</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" width="35"><img border="0"
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAMUlEQVQ4jWNhoDJgoZmBPs8Y/lNi0BYpBkYUA6kFRg0cNXDUwFED6WwgrDyjmoHUAgBQBAQgY03acAAAAABJRU5ErkJggg=="
+                                            style="opacity:1" /></td>
+                                    <td>
+                                        <table style="width:95%">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="left">Yaxshi rivojlangan</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" width="35"><img border="0"
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAMUlEQVQ4jWNhoDJgoZmBFisY/lNi0IkIBkYUA6kFRg0cNXDUwFED6WwgrDyjmoHUAgBsSARyA6dJagAAAABJRU5ErkJggg=="
+                                            style="opacity:1" /></td>
+                                    <td>
+                                        <table style="width:95%">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="left">
+                                                        <p>Juda yaxshi rivojlangan</p>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="legend d-none">
+                        <p style="text-align:center">&nbsp;</p>
+                        <p style="text-align:center"><strong><span style="color:#e60000">NDMI o'simlikning namligi</span></strong></p>
+                        <table cellpadding="0" cellspacing="0" style="width:95%">
+                            <tbody>
+                                <tr>
+                                    <td align="center" width="35"><img border="0"
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAMUlEQVQ4jWNhoDJgoZmB+1/+/0+JQY7ijIwoBlILjBo4auCogaMG0tlAWHlGNQOpBQDOowSrMb7mqgAAAABJRU5ErkJggg=="
+                                            style="opacity:1" /></td>
+                                    <td>
+                                        <table style="width:95%">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="left">O'simlik qatlami mavjud emas</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" width="35"><img border="0"
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAMUlEQVQ4jWNhoDJgoZmBDgv+/6fEoAMJjIwoBlILjBo4auCogaMG0tlAWHlGNQOpBQAT8QVzTbrC5gAAAABJRU5ErkJggg=="
+                                            style="opacity:1" /></td>
+                                    <td>
+                                        <table style="width:95%">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="left">Suvning yuqori darajadagi yetishmovchiligi (o'simlik qatlami juda past)</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" width="35"><img border="0"
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAL0lEQVQ4jWNhoDJgoZ2BwRf+U2TSWgNGVAOpBEYNHDVw1MBRA+ltILQ8o56BVAIAUkgELxAZcbsAAAAASUVORK5CYII="
+                                            style="opacity:1" /></td>
+                                    <td>
+                                        <table style="width:95%">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="left">Suv yetishmovchiligi mavjud (o'simlik qatlami o'rtacha)</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" width="35"><img border="0"
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAL0lEQVQ4jWNhoDJgoZ2BasX/KTLpVi8jqoFUAqMGjho4auCogfQ2EFqeUc9AKgEAgVsEuUECZ2QAAAAASUVORK5CYII="
+                                            style="opacity:1" /></td>
+                                    <td>
+                                        <table style="width:95%">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="left">Suv yetarli darajada (hudud zich o'simlik bilan qoplangan</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="legend d-none">
+                        <p>&nbsp;</p>
+                        <p><strong><span style="color:#e60000">GNDVI o'simlikdagi azot miqdori</span></strong></p>
+                        <table cellpadding="0" cellspacing="0" style="width:95%">
+                            <tbody>
+                                <tr>
+                                    <td align="center" width="35"><img border="0"
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAMUlEQVQ4jWNhoDJgoZmB3/98/U+JQZws3IwoBlILjBo4auCogaMG0tlAWHlGNQOpBQC4CQRqXX2XZgAAAABJRU5ErkJggg=="
+                                            style="opacity:1" /></td>
+                                    <td>
+                                        <table style="width:95%">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="left">Ochiq yer</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" width="35"><img border="0"
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAMUlEQVQ4jWNhoDJgoZmBx18e+E+JQZbiDowoBlILjBo4auCogaMG0tlAWHlGNQOpBQDhRATiHVCfdAAAAABJRU5ErkJggg=="
+                                            style="opacity:1" /></td>
+                                    <td>
+                                        <table style="width:95%">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="left">Juda yomon (o'simlik yo'q, nobud bo'lgan ekinlar)</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" width="35"><img border="0"
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAMUlEQVQ4jWNhoDJgoZmBJUfK/lNiUI9NFyOKgdQCowaOGjhq4KiBdDYQVp5RzUBqAQAkDAWkbZJl8AAAAABJRU5ErkJggg=="
+                                            style="opacity:1" /></td>
+                                    <td>
+                                        <table style="width:95%">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="left">Stress (azot yetishmovchiligi, ekin vegetatsiyasining boshlanishi)</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" width="35"><img border="0"
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAMUlEQVQ4jWNhoDJgoZmByt2u/ykx6G7pbkYUA6kFRg0cNXDUwFED6WwgrDyjmoHUAgBkdAZfCq/ZAQAAAABJRU5ErkJggg=="
+                                            style="opacity:1" /></td>
+                                    <td>
+                                        <table style="width:95%">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="left">Yaxshi (azot yetarli, qoniqarli ekinlar)</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" width="35"><img border="0"
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAL0lEQVQ4jWNhoDJgoZ2BLtL/KTJpz1NGVAOpBEYNHDVw1MBRA+ltILQ8o56BVAIAlPME81HUPUMAAAAASUVORK5CYII="
+                                            style="opacity:1" /></td>
+                                    <td>
+                                        <table style="width:95%">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="left">
+                                                        <p>Juda yaxshi (azot yetarli, yaxshi ekinlar)</p>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <table id="ndvi-data" class="table table-bordered float-end">
+                        <thead>
+                            <tr>
+                                <th>Turi</th>
+                                <th>Maydoni</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mt-3">
+            <div class="row">
+                <div class="col-12 mb-2">
+                    <div class="w-100 border border-3 p-3 text-center">
+                        <h5>Havo harorati</h5>
+                        <span id="temperature-data">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="{{ url_for('static', filename='js/dashboard/district.js') }}"></script>
+<script>
+    const setFeaturesToMap = () => {
+        let returnData;
+        let index = 1;
+        $("#polygon-data tbody").empty();
+        $.ajax({
+            method: "GET",
+            url: "{{ url_for('api.polygon_list') }}",
+            async: false
+        }).always(data => {
+            if (data.features) {
+                data.features.forEach(item => {
+                    let properties = item.properties;
+                    let tr = $("<tr></tr>");
+                    tr.append(`<td class='polygon-${properties.id}' style="cursor: pointer;">${index}</td>`);
+                    tr.append(`<td class='polygon-${properties.id}' style="cursor: pointer;">${properties.farmer_name}</td>`);
+                    tr.append(`<td class='polygon-${properties.id}' style="cursor: pointer;">${properties.area.toFixed(2)} ga</td>`);
+                    $("#polygon-data tbody").append(tr);
+                    index++;
+                });
+            }
+            returnData = L.geoJSON(data, {
+                style: {
+                    color: "red",
+                    fillColor: "transparent"
+                },
+                onEachFeature: (feature, layer) => {
+                    let id = feature.properties.id;
+                    $(`.polygon-${id}`).on("click", () => {
+                        map.fitBounds(layer.getBounds())
+                        $.ajax({
+                            method: "POST",
+                            url: "{{ url_for('api.polygon_data') }}",
+                            data: JSON.stringify({
+                                'polygon_id': id
+                            }),
+                            contentType: "application/json"
+                        }).always(response => {
+                            $("#temperature-data").html(`${response.data.temperature.toFixed(2)} <sup>o</sup>C`);
+                            $("#ndvi-data tbody").empty();
+                            response.data.ndvi.forEach(item => {
+                                let tr = $("<tr></tr>");
+                                let key = Object.keys(item)[0];
+                                tr.append(`<td>${key}</td>`);
+                                tr.append(`<td>${item[key].toFixed(2)} ga</td>`);
+                                $("#ndvi-data tbody").append(tr);
+                            })
+                        })
+                    })
+                }
+            }).addTo(map);
+        });
+        return returnData;
+    };
+    const createPolygon = layer => {
+        let geometry = layer._latlngs[0];
+        let feature = {
+            type: "Feature",
+            geometry: {
+                type: "Polygon",
+                coordinates: [
+                    geometry.map(item => [item.lat, item.lng]).concat([
+                        [
+                            geometry[0].lat,
+                            geometry[0].lng
+                        ]
+                    ])
+                ]
+            },
+            properties: {
+                area: L.GeometryUtil.geodesicArea(geometry) / 10000,
+                farmer: $("#farmer").val()
+            }
+        };
+        $.ajax({
+            method: "POST",
+            url: "{{ url_for('api.polygon_create') }}",
+            data: JSON.stringify(feature),
+            contentType: "application/json"
+        }).always(() => {
+            map.removeLayer(polygonLayer);
+            polygonLayer = setFeaturesToMap();
+            $("#polygonCreateModal").modal("hide");
+        });
+    };
+
+    let map = L.map("map").setView([40.6, 72.5], 10);
+    let districtLayer;
+    let tileLayer;
+    let polygonLayer;
+    let createdFeature;
+
+    L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        attribution: '&copy; <a href="{{ url_for('core.index') }}">AgroLand</a> contributors'
+        }).addTo(map);
+
+    districtLayer = L.geoJSON(DISTRICT, {
+        color: "blue",
+        fillColor: "transparent"
+    }).addTo(map);
+    map.fitBounds(districtLayer.getBounds());
+
+    polygonLayer = setFeaturesToMap();
+
+    let drawControl = new L.Control.Draw({
+        position: "topright",
+        draw: {
+            polygon: {
+                allowIntersection: false,
+                showArea: true,
+                shapeOptions: {
+                    color: "red",
+                }
+            },
+            circle: false,
+            circlemarker: false,
+            marker: false,
+            polyline: false,
+            rectangle: false
+        },
+        edit: false
+    });
+    // map.addControl(drawControl);
+
+    $("#index").on("change", event => {
+        let value = event.target.value;
+        if (tileLayer || value == "-1") {
+            map.removeLayer(tileLayer);
+        }
+        if (["0", "1", "2"].includes(value)) {
+            tileLayer = L.esri.dynamicMapLayer({
+                url: "https://gis.agro.uz/server/rest/services/klaster_index1/MapServer/",
+                layers: [value]
+            }).addTo(map);
+        }
+        $(`.legend`).removeClass("d-none");
+        $(`.legend`).each(index => {
+            if (index != value) {
+                $(`.legend:nth-child(${index + 2})`).addClass("d-none");
+            }
+        })
+    })
+
+    $("#btn-add-polygon").on("click", () => {
+        drawHandlerOptions = {
+            allowIntersection: false,
+            showArea: true,
+            shapeOptions: {
+                color: "red",
+            }
+        };
+        const drawHandler = new L.Draw.Polygon(map, drawHandlerOptions).enable();
+    });
+
+    $("#polygonCreateModal button[type='submit']").on("click", event => {
+        event.preventDefault();
+        createPolygon(createdFeature);
+    });
+
+    map.on("draw:created", event => {
+        createdFeature = event.layer;
+        $("#polygonCreateModal").modal("show");
+    });
+</script>
+{% endblock %}

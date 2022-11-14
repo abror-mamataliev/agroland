@@ -1,0 +1,20 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Bosh sahifa{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+{% block content %}
+    <header class="masthead" style='background: url("http://{{ request.host }}{{ url_for('static', filename='img/background.jpg') }}") no-repeat center; background-size: 80%;'>
+        <div class="container position-relative">
+            <div class="row justify-content-center">
+                <div class="col-xl-6">
+                    <div class="text-center text-white">
+                        <h1 class="mb-5">Ekin maydonlari holatini kosmik suratlar orqali tahlil qilish tizimi</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+{% endblock %}

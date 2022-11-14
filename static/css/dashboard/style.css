@@ -1,0 +1,12 @@
+#map {
+    width: 100%;
+    min-height: 400px;
+    min-width: 300px;
+    max-width: 2000px;
+}
+
+#btn-add-polygon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}

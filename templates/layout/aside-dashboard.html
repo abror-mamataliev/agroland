@@ -1,0 +1,22 @@
+<div class="d-flex flex-column flex-shrink-0 bg-light position-fixed sidebar-mini">
+    <a href="{{ url_for('dashboard.index') }}" class="d-block p-3 link-dark text-decoration-none mb-3" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="AgroLand">
+        <img src="{{ url_for('static', filename='img/logo.jpg') }}" height="50">
+        <span class="visually-hidden">AgroLand</span>
+    </a>
+    <ul class="nav nav-pills nav-flush flex-column mb-auto text-center">
+        <li class="nav-item">
+            <a href="{{ url_for('dashboard.index') }}" class="nav-link {% if request.path == url_for('dashboard.index') %}active{% else %}link-dark{% endif %} py-3 border-bottom rounded-0" aria-current="page" data-bs-toggle="tooltip" data-bs-placement="right" aria-label="Dashboard" data-bs-original-title="Dashboard">
+                <span>
+                    <i class="bi pe-none fa-solid fa-house" style="font-size: 24px; width: 30px;" aria-label="Dashboard"></i>
+                </span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link {% if request.path == url_for('dashboard.polygons') %}active{% else %}link-dark{% endif %} py-3 border-bottom rounded-0" aria-current="page" data-bs-toggle="tooltip" data-bs-placement="right" aria-label="Download" data-bs-original-title="Download">
+                <span>
+                    <i class="bi pe-none fa-solid fa-download" style="font-size: 24px; width: 30px;" aria-label="Download"></i>
+                </span>
+            </a>
+        </li>
+    </ul>
+</div>

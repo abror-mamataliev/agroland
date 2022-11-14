@@ -1,0 +1,38 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Ro'yhatdan o'tish{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth/login.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="text-center form-signin">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endwith %}
+        <form method="POST">
+            <img src="{{ url_for('static', filename='img/logo.jpg') }}" height="150">
+            <h1 class="h3 my-3 fw-normal">Ro'yhatdan o'tish</h1>
+            {% for field in registerform %}
+                {% if field.name == 'csrf_token' %}
+                    {{ field }}
+                {% elif field.name == 'submit' %}
+                    {{ field(class_='w-100 btn btn-primary mt-2', style='background-color: #3fd951;') }}
+                {% else %}
+                    <div class="form-floating">
+                        {{ field(class_='form-control mb-0') }}
+                        {{ field.label }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <!-- <button class="w-100 btn btn-lg btn-primary" type="submit">Kirish</button> -->
+            <p class="mt-5 mb-3 text-muted">&copy; MAP.AGRO.UZ - 2022</p>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,7 @@
+.sidebar-mini {
+    width: 4.5rem;
+}
+
+.sidebar-mini, .sidebar-full {
+    height: 100vh;
+}
