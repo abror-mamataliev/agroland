@@ -8,6 +8,9 @@ class BaseConfig:
 
     SECRET_KEY = config("SECRET_KEY")
 
+    HOST = config("HOST")
+    PORT = config("PORT", cast=int)
+
     DATABASE_ENGINE = config("DATABASE_ENGINE")
     DATABASE_NAME = config("DATABASE_NAME")
     if DATABASE_ENGINE == "sqlite":
